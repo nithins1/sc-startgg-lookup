@@ -1,1 +1,2 @@
-key.txt
+*.txt
+*.cache
