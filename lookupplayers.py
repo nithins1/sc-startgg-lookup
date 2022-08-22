@@ -10,6 +10,14 @@ parser.add_argument("-n", "--nocache", action="store_true", help="discard cache 
 
 args = parser.parse_args()
 
+
+if not os.path.exists("key.txt"):
+  open("key.txt", "a").close()
+  print("You need a Start.GG API key to use this tool.")
+  print("Go to Start.GG -> Developer Settings -> Create new token")
+  print("Copy the code, then paste it into the local file key.txt")
+  exit(1)
+
 input_url = input("Enter tournament URL: ")
 
 with open('key.txt', 'r') as file:
