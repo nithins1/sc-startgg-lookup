@@ -4,7 +4,10 @@ import argparse
 import os
 
 
-parser = argparse.ArgumentParser(description="Gets list of Santa Cruz players attending a specific event.")
+parser = argparse.ArgumentParser(description="Gets list of Santa Cruz players attending a specific event.",
+                                 epilog="Be sure to enter a link to an event on start.gg, such as "
+                                 "start.gg/tournament/XXXXX/event/ultimate-singles, "
+                                 "not just start.gg/tournament/XXXXX")
 parser.add_argument("-m", "--min", type=int, dest="min_tourneys", default=3, help="minimum number of tourneys required to be added to list")
 parser.add_argument("-n", "--nocache", action="store_true", help="discard cache of Santa Cruz players")
 
@@ -18,7 +21,10 @@ if not os.path.exists("key.txt"):
   print("Copy the code, then paste it into the local file key.txt")
   exit(1)
 
-input_url = input("Enter tournament URL: ")
+input_url = ""
+while "smash.gg/" not in input_url and "start.gg/" not in input_url:
+  input_url = input("Enter event URL: ")
+
 
 with open('key.txt', 'r') as file:
     api_key = file.read()
@@ -27,8 +33,6 @@ if args.nocache or not os.path.exists("players.cache"):
   tourney_names = [f"11th-hour-smash-{i}" for i in range(1, 28)]
   tourney_names[0] = "11th-hour-smash-the-return"
   tourney_names[7] = "11th-hour-smash-8-50-prize-pot-free-to-enter"
-
-  #print(tourney_names)
 
   player_counts = collections.Counter()
 
@@ -50,7 +54,15 @@ if args.nocache or not os.path.exists("players.cache"):
     response = requests.post(url="https://api.start.gg/gql/alpha",
                 json={"query": players_query},
                 headers={"Authorization": "Bearer " + api_key})
-    
+    if response.status_code == 400:
+      print("Your API key was invalid. Try generating a new one.")
+      exit(1)
+    elif response.status_code == 429:
+      pass #TODO
+    elif response.status_code > 400:
+      print("Error occured while making start.gg API requests.")
+      exit(1)
+
     to_json = response.json()
     #print(to_json)
     if to_json["data"]["event"]:
@@ -71,4 +83,7 @@ else:
   with open("players.cache") as cache_file:
     for line in cache_file:
       sc_players.add(line.rstrip())
-  print(sc_players)
+
+slug_idx = max(input_url.find("start.gg"), input_url.find("smash.gg"))
+input_slug = input_url[len("start.gg") + slug_idx:]
+#TODO
