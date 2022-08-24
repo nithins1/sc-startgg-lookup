@@ -15,10 +15,10 @@ args = parser.parse_args()
 
 
 if not os.path.exists("key.txt"):
-    open("key.txt", "a").close()
+    open("key.txt", "a").close() # Create empty file
     print("You need a Start.GG API key to use this tool.")
     print("Go to Start.GG -> Developer Settings -> Create new token")
-    print("Copy the code, then paste it into the local file key.txt")
+    print("Copy the code, then paste it into the local file `key.txt`")
     exit(1)
 
 input_url = ""
@@ -51,12 +51,8 @@ if args.nocache or not os.path.exists("players.cache"):
         if to_json["data"]["event"]:
             for d in to_json["data"]["event"]["entrants"]["nodes"]:
                 player_counts[d["name"]] += 1
-        
-    print(player_counts)
-
 
     sc_players = {name for name in player_counts if player_counts[name] >= args.min_tourneys}
-    print(sc_players)
 
     cache_file = open("players.cache", "w")
     cache_file.write("\n".join(sc_players))
@@ -66,6 +62,14 @@ else:
         for line in cache_file:
             sc_players.add(line.rstrip())
 
-slug_idx = max(input_url.find("start.gg"), input_url.find("smash.gg"))
-input_slug = input_url[len("start.gg") + slug_idx:]
-#TODO
+slug_idx = max(input_url.find("start.gg/"), input_url.find("smash.gg/"))
+input_slug = input_url[len("start.gg/") + slug_idx:]
+
+output_list = []
+for page in apiquery.tourney_query(input_slug, api_key):
+    for node in page:
+        if node["name"] in sc_players:
+            output_list.append(node["name"])
+
+print("Santa Cruz players in attendance:")
+print("\n".join(output_list))
