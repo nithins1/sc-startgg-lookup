@@ -2,7 +2,8 @@ from cmath import inf
 import requests
 
 def sc_query(tourney_name, key):
-    query = f"""query EntrantsByTourney {{
+    query = \
+    f"""query EntrantsByTourney {{
       event(slug:"tournament/{tourney_name}/event/ultimate-singles") {{
         numEntrants
         entrants(query: {{perPage:64, page:1}}) {{
@@ -17,8 +18,8 @@ def sc_query(tourney_name, key):
     }}"""
 
     return requests.post(url="https://api.start.gg/gql/alpha",
-                    json={"query": query},
-                    headers={"Authorization": "Bearer " + key})
+                         json={"query": query},
+                         headers={"Authorization": "Bearer " + key})
 
 def tourney_query(event_slug, key):
     page_num = 1
