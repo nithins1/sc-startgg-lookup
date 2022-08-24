@@ -1,5 +1,4 @@
 import collections
-import requests
 import argparse
 import os
 import apiquery
@@ -38,11 +37,7 @@ if args.nocache or not os.path.exists("players.cache"):
     player_counts = collections.Counter()
 
     for name in tourney_names:
-        players_query = apiquery.sc_query(name)
-
-        response = requests.post(url="https://api.start.gg/gql/alpha",
-                    json={"query": players_query},
-                    headers={"Authorization": "Bearer " + api_key})
+        response = apiquery.sc_query(name, api_key)
         if response.status_code == 400:
             print("Your API key was invalid. Try generating a new one.")
             exit(1)
@@ -53,9 +48,7 @@ if args.nocache or not os.path.exists("players.cache"):
             exit(1)
 
         to_json = response.json()
-        #print(to_json)
         if to_json["data"]["event"]:
-        #print(to_json["data"]["event"]["entrants"]["nodes"])
             for d in to_json["data"]["event"]["entrants"]["nodes"]:
                 player_counts[d["name"]] += 1
         
