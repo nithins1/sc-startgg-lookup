@@ -1,6 +1,7 @@
 import collections
 import argparse
 import os
+import re
 import apiquery
 
 
@@ -22,15 +23,18 @@ if not os.path.exists("key.txt"):
     exit(1)
 
 input_url = ""
-while "smash.gg/" not in input_url and "start.gg/" not in input_url:
-    input_url = input("Enter event URL: ")
+pattern = re.compile("(start|smash)\.gg\/tournament\/[\w-]+\/event/[\w-]+")
+while not input_url:
+    input_url = pattern.search(input("Enter event URL: "))
 
+input_url = input_url[0] # Get full regex match from Match object
 
 with open('key.txt', 'r') as file:
     api_key = file.read()
 
 if args.nocache or not os.path.exists("players.cache"):
     tourney_names = [f"11th-hour-smash-{i}" for i in range(1, 28)]
+    # Add irregular tourney names
     tourney_names[0] = "11th-hour-smash-the-return"
     tourney_names[7] = "11th-hour-smash-8-50-prize-pot-free-to-enter"
 
@@ -62,9 +66,8 @@ else:
         for line in cache_file:
             sc_players.add(line.rstrip())
 
-slug_idx = max(input_url.find("start.gg/"), input_url.find("smash.gg/"))
-input_slug = input_url[len("start.gg/") + slug_idx:]
 
+input_slug = input_url[len("start.gg/"):]
 output_list = []
 for page in apiquery.tourney_query(input_slug, api_key):
     for node in page:
