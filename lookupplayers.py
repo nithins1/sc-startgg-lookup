@@ -23,7 +23,7 @@ if not os.path.exists("key.txt"):
     exit(1)
 
 input_url = ""
-pattern = re.compile("(start|smash)\.gg\/tournament\/[\w-]+\/event/[\w-]+")
+pattern = re.compile("(start|smash)\.gg\/tournament\/[a-zA-Z0-9-]+\/event/[a-zA-Z0-9-]+")
 while not input_url:
     input_url = pattern.search(input("Enter event URL: "))
 
